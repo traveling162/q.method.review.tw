@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>陳述句．專家審查系統</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F6F3EC;
+    --paper-raised:#FDFBF6;
+    --ink:#20262E;
+    --ink-soft:#5C6570;
+    --ink-faint:#9AA1A9;
+    --line:#DCD5C4;
+    --line-strong:#C7BEA8;
+    --red:#A93F2B;
+    --red-soft:#F1DFD8;
+    --teal:#2E6459;
+    --teal-soft:#DCE9E4;
+    --amber:#8A6A1F;
+    --amber-soft:#EFE3C4;
+    --radius:3px;
+    --shadow:0 1px 2px rgba(32,38,46,0.06), 0 6px 20px rgba(32,38,46,0.05);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+  ::selection{background:var(--red-soft);}
+
+  /* ---------- Utility ---------- */
+  .mono{font-family:'JetBrains Mono',monospace;}
+  .serif{font-family:'Source Serif 4',serif;}
+  button{font-family:inherit;cursor:pointer;}
+  a{color:inherit;}
+
+  /* ---------- Login Screen ---------- */
+  #loginScreen{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+    position:relative;
+    overflow:hidden;
+  }
+  #loginScreen::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background-image:
+      repeating-linear-gradient(0deg, transparent, transparent 27px, var(--line) 28px);
+    opacity:0.35;
+    pointer-events:none;
+  }
+  .login-card{
+    position:relative;
+    background:var(--paper-raised);
+    border:1px solid var(--line-strong);
+    border-radius:var(--radius);
+    padding:48px 44px 40px;
+    max-width:440px;
+    width:100%;
+    box-shadow:var(--shadow);
+  }
+  .login-card::before{
+    content:"";
+    position:absolute;
+    top:0; left:28px;
+    width:1px; height:100%;
+    background:var(--red-soft);
+  }
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:var(--red);
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-bottom:18px;
+  }
+  .eyebrow::before{
+    content:"";
+    width:16px;height:1px;
+    background:var(--red);
+    display:inline-block;
+  }
+  .login-card h1{
+    font-family:'Source Serif 4',serif;
+    font-size:26px;
+    font-weight:600;
+    line-height:1.3;
+    margin:0 0 10px;
+  }
+  .login-card p{
+    color:var(--ink-soft);
+    font-size:14px;
+    line-height:1.7;
+    margin:0 0 28px;
+  }
+  .field-label{
+    font-size:12px;
+    color:var(--ink-soft);
+    margin-bottom:8px;
+    display:block;
+    font-weight:500;
+  }
+  #expertNameInput{
+    width:100%;
+    padding:13px 14px;
+    border:1px solid var(--line-strong);
+    border-radius:var(--radius);
+    background:#fff;
+    font-size:15px;
+    font-family:'Source Serif 4',serif;
+    color:var(--ink);
+    margin-bottom:22px;
+  }
+  #expertNameInput:focus{outline:2px solid var(--teal); outline-offset:1px;}
+  .btn-primary{
+    width:100%;
+    padding:14px;
+    background:var(--ink);
+    color:var(--paper-raised);
+    border:none;
+    border-radius:var(--radius);
+    font-size:14px;
+    font-weight:600;
+    letter-spacing:0.02em;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    transition:background .15s ease;
+  }
+  .btn-primary:hover{background:var(--red);}
+  .btn-primary:disabled{background:var(--ink-faint); cursor:not-allowed;}
+
+  /* ---------- App Shell ---------- */
+  #appScreen{display:none;}
+  header.topbar{
+    position:sticky; top:0; z-index:20;
+    background:rgba(246,243,236,0.92);
+    backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--line-strong);
+    padding:14px 28px;
+  }
+  .topbar-inner{
+    max-width:1240px;
+    margin:0 auto;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    flex-wrap:wrap;
+  }
+  .brand{display:flex; align-items:center; gap:10px;}
+  .brand-mark{
+    width:26px;height:26px;
+    border:1.5px solid var(--ink);
+    border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Source Serif 4',serif;
+    font-size:13px;font-weight:700;
+    flex-shrink:0;
+  }
+  .brand-text{font-size:13px; color:var(--ink-soft);}
+  .brand-text strong{color:var(--ink); font-weight:600;}
+  .expert-badge{
+    font-size:12px;
+    color:var(--ink-soft);
+    display:flex;align-items:center;gap:6px;
+  }
+  .expert-badge strong{color:var(--ink); font-weight:600;}
+
+  .stats-bar{
+    max-width:1240px;
+    margin:0 auto;
+    padding:18px 28px 0;
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:1px;
+    background:var(--line-strong);
+    border:1px solid var(--line-strong);
+    border-radius:var(--radius);
+    overflow:hidden;
+  }
+  .stat{
+    background:var(--paper-raised);
+    padding:14px 16px;
+    text-align:left;
+  }
+  .stat .num{
+    font-family:'Source Serif 4',serif;
+    font-size:24px;
+    font-weight:600;
+    line-height:1;
+  }
+  .stat .lbl{
+    font-size:10.5px;
+    color:var(--ink-soft);
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+    margin-top:6px;
+  }
+  .stat.pct .num{color:var(--teal);}
+
+  main{
+    max-width:1240px;
+    margin:0 auto;
+    padding:26px 28px 100px;
+  }
+
+  .intro-panel{
+    background:var(--paper-raised);
+    border:1px solid var(--line-strong);
+    border-radius:var(--radius);
+    padding:26px 28px;
+    margin-bottom:32px;
+  }
+  .intro-panel h2{
+    font-family:'Source Serif 4',serif;
+    font-size:19px;
+    margin:0 0 10px;
+  }
+  .intro-panel p{
+    font-size:13.5px;
+    line-height:1.85;
+    color:var(--ink-soft);
+    margin:0 0 20px;
+  }
+  .steps{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:14px;
+  }
+  .step{font-size:12px; color:var(--ink-soft); line-height:1.6;}
+  .step .step-num{
+    font-family:'Source Serif 4',serif;
+    font-size:17px;
+    color:var(--red);
+    font-weight:600;
+    display:block;
+    margin-bottom:4px;
+  }
+  .step strong{display:block; color:var(--ink); font-weight:600; margin-bottom:2px;}
+
+  /* ---------- Statement Card ---------- */
+  #cardList{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(270px, 1fr));
+    gap:14px;
+  }
+  .card{
+    background:var(--paper-raised);
+    border:1px solid var(--line-strong);
+    border-radius:var(--radius);
+    margin-bottom:0;
+    padding:16px 18px 18px;
+    position:relative;
+    transition:border-color .15s ease;
+    display:flex;
+    flex-direction:column;
+  }
+  .card.is-complete{border-left:3px solid var(--teal);}
+  .card.is-pending{border-left:3px solid var(--line-strong);}
+
+  .card-head{
+    display:flex;
+    gap:10px;
+    margin-bottom:14px;
+  }
+  .card-index{
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+    color:var(--ink-faint);
+    padding-top:3px;
+    flex-shrink:0;
+    min-width:20px;
+  }
+  .card-text{
+    font-family:'Source Serif 4',serif;
+    font-size:14.5px;
+    line-height:1.55;
+    color:var(--ink);
+  }
+
+  .row-label{
+    font-size:10px;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    color:var(--ink-faint);
+    margin-bottom:7px;
+    display:block;
+  }
+  .field-block{margin-bottom:13px;}
+  .field-block:last-child{margin-bottom:0;}
+
+  /* nature pills */
+  .pill-group{display:flex; gap:6px;}
+  .pill{
+    flex:1;
+    padding:7px 3px;
+    text-align:center;
+    border:1px solid var(--line-strong);
+    border-radius:var(--radius);
+    background:transparent;
+    font-size:12px;
+    color:var(--ink-soft);
+    transition:all .12s ease;
+  }
+  .pill:hover{border-color:var(--ink-soft);}
+  .pill.active[data-val="positive"]{background:var(--teal-soft); border-color:var(--teal); color:var(--teal); font-weight:600;}
+  .pill.active[data-val="negative"]{background:var(--red-soft); border-color:var(--red); color:var(--red); font-weight:600;}
+  .pill.active[data-val="neutral"]{background:var(--amber-soft); border-color:var(--amber); color:var(--amber); font-weight:600;}
+
+  /* necessity dial */
+  .necessity-scale{
+    display:flex;
+    align-items:center;
+    gap:0;
+    position:relative;
+  }
+  .necessity-scale .track{
+    position:absolute;
+    top:8px; left:8px; right:8px;
+    height:1px;
+    background:var(--line-strong);
+    z-index:0;
+  }
+  .necessity-dot-wrap{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:5px;
+    position:relative;
+    z-index:1;
+  }
+  .necessity-dot{
+    width:16px; height:16px;
+    border-radius:50%;
+    border:1.5px solid var(--line-strong);
+    background:var(--paper-raised);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'JetBrains Mono',monospace;
+    font-size:9px;
+    color:var(--ink-faint);
+    transition:all .12s ease;
+  }
+  .necessity-dot-wrap:hover .necessity-dot{border-color:var(--ink-soft); color:var(--ink-soft);}
+  .necessity-dot-wrap.active .necessity-dot{
+    background:var(--red);
+    border-color:var(--red);
+    color:#fff;
+    transform:scale(1.12);
+  }
+  .necessity-tag{display:none;}
+
+  /* no-edit checkbox */
+  .noedit-row{
+    display:flex; align-items:center; gap:8px;
+    padding:9px 11px;
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    cursor:pointer;
+  }
+  .noedit-row input{width:15px;height:15px; accent-color:var(--teal); flex-shrink:0;}
+  .noedit-row span{font-size:12px; color:var(--ink-soft);}
+  .noedit-row.checked{background:var(--teal-soft); border-color:var(--teal);}
+  .noedit-row.checked span{color:var(--teal); font-weight:600;}
+
+  textarea.remark{
+    width:100%;
+    min-height:56px;
+    padding:9px 11px;
+    border:1px solid var(--line-strong);
+    border-radius:var(--radius);
+    font-family:'Inter',sans-serif;
+    font-size:12.5px;
+    color:var(--ink);
+    resize:vertical;
+    background:#fff;
+  }
+  textarea.remark:focus{outline:2px solid var(--teal); outline-offset:1px;}
+  textarea.remark::placeholder{color:var(--ink-faint);}
+  textarea.remark:disabled{background:var(--paper); color:var(--ink-faint);}
+
+  /* ---------- Footer / Export ---------- */
+  .export-bar{
+    position:fixed;
+    bottom:0; left:0; right:0;
+    background:rgba(246,243,236,0.95);
+    backdrop-filter:blur(6px);
+    border-top:1px solid var(--line-strong);
+    padding:14px 28px;
+    display:flex;
+    justify-content:center;
+    z-index:15;
+  }
+  .export-bar-inner{
+    max-width:1240px;
+    width:100%;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:16px;
+  }
+  .export-hint{font-size:12px; color:var(--ink-soft);}
+  .btn-export{
+    padding:12px 26px;
+    background:var(--ink);
+    color:var(--paper-raised);
+    border:none;
+    border-radius:var(--radius);
+    font-size:13.5px;
+    font-weight:600;
+    display:flex; align-items:center; gap:8px;
+  }
+  .btn-export:hover{background:var(--red);}
+
+  /* ---------- Modal ---------- */
+  .modal-overlay{
+    display:none;
+    position:fixed; inset:0;
+    background:rgba(32,38,46,0.55);
+    z-index:50;
+    align-items:center; justify-content:center;
+    padding:20px;
+  }
+  .modal-overlay.show{display:flex;}
+  .modal-box{
+    background:var(--paper-raised);
+    border-radius:var(--radius);
+    max-width:440px; width:100%;
+    padding:34px 30px 28px;
+    box-shadow:0 20px 60px rgba(0,0,0,0.25);
+  }
+  .modal-box .check-icon{
+    width:44px;height:44px;
+    border-radius:50%;
+    background:var(--teal-soft);
+    color:var(--teal);
+    display:flex;align-items:center;justify-content:center;
+    font-size:20px;
+    margin-bottom:16px;
+  }
+  .modal-box h3{
+    font-family:'Source Serif 4',serif;
+    font-size:19px;
+    margin:0 0 10px;
+  }
+  .modal-box p{font-size:13.5px; color:var(--ink-soft); line-height:1.75; margin:0 0 18px;}
+  .email-row{
+    display:flex; align-items:center; justify-content:space-between;
+    background:var(--paper);
+    border:1px solid var(--line-strong);
+    border-radius:var(--radius);
+    padding:10px 14px;
+    margin-bottom:18px;
+  }
+  .email-row span{font-family:'JetBrains Mono',monospace; font-size:12.5px;}
+  .email-row button{
+    background:none; border:1px solid var(--line-strong);
+    border-radius:var(--radius);
+    font-size:11px; padding:5px 10px;
+    color:var(--ink-soft);
+  }
+  .email-row button:hover{border-color:var(--ink);}
+  .modal-steps{margin:0 0 22px; padding-left:0; list-style:none;}
+  .modal-steps li{
+    font-size:12.5px; color:var(--ink-soft);
+    display:flex; gap:10px; margin-bottom:8px;
+    align-items:flex-start;
+  }
+  .modal-steps li .n{
+    font-family:'JetBrains Mono',monospace;
+    color:var(--red); flex-shrink:0;
+  }
+  .modal-actions{display:flex; flex-direction:column; gap:10px;}
+  .btn-mailto{
+    text-align:center;
+    padding:12px;
+    background:var(--ink);
+    color:var(--paper-raised);
+    border-radius:var(--radius);
+    font-size:13px; font-weight:600;
+    text-decoration:none;
+  }
+  .btn-mailto:hover{background:var(--red);}
+  .btn-close-modal{
+    text-align:center;
+    padding:12px;
+    background:none;
+    border:1px solid var(--line-strong);
+    border-radius:var(--radius);
+    font-size:13px;
+    color:var(--ink-soft);
+  }
+  .btn-close-modal:hover{border-color:var(--ink);}
+
+  @media (max-width:640px){
+    .steps{grid-template-columns:repeat(2,1fr);}
+    .stats-bar{grid-template-columns:repeat(2,1fr);}
+    .necessity-tag{display:none;}
+    main{padding:22px 16px 110px;}
+    .topbar{padding:14px 16px;}
+    .stats-bar{padding:16px 16px 0;}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    *{transition:none !important;}
+  }
+
+  :focus-visible{outline:2px solid var(--teal); outline-offset:2px;}
+</style>
+</head>
+<body>
+
+<!-- ============ LOGIN SCREEN ============ -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="eyebrow">DELPHI EXPERT REVIEW</div>
+    <h1>陳述句．專家審查系統</h1>
+    <p>請輸入您的姓名以進入審查系統。您的姓名將自動標記在每筆回答上，方便研究者彙整各位專家的意見。</p>
+    <label class="field-label" for="expertNameInput">您的姓名</label>
+    <input type="text" id="expertNameInput" placeholder="例如：王小明" autocomplete="off">
+    <button class="btn-primary" id="loginBtn">確認進入系統 →</button>
+  </div>
+</div>
+
+<!-- ============ APP SCREEN ============ -->
+<div id="appScreen">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="brand-mark">Q</div>
+        <div class="brand-text"><strong>陳述句．專家審查系統</strong></div>
+      </div>
+      <div class="expert-badge">審查專家：<strong id="expertNameDisplay"></strong></div>
+    </div>
+  </header>
+
+  <div class="stats-bar">
+    <div class="stat"><div class="num" id="statTotal">0</div><div class="lbl">總陳述句</div></div>
+    <div class="stat"><div class="num" id="statRated">0</div><div class="lbl">已評分</div></div>
+    <div class="stat"><div class="num" id="statPending">0</div><div class="lbl">待評分</div></div>
+    <div class="stat pct"><div class="num" id="statPct">0%</div><div class="lbl">完成度</div></div>
+  </div>
+
+  <main>
+    <section class="intro-panel">
+      <h2>審查說明</h2>
+      <p>請針對下列每一條陳述句，依序完成性質確認、必要性評分，並視情況填寫修改建議。完成後請點選下方「匯出 CSV」，並依指示寄回研究者。</p>
+      <div class="steps">
+        <div class="step"><span class="step-num">①</span><strong>性質確認</strong>確認每條陳述句的性質（正向、負向、中性）</div>
+        <div class="step"><span class="step-num">②</span><strong>必要性評分</strong>每條陳述句給予 1–5 分（1 = 非常不必要，5 = 非常必要）</div>
+        <div class="step"><span class="step-num">③</span><strong>無需修改確認</strong>若陳述句無需修改，勾選「無需修改」</div>
+        <div class="step"><span class="step-num">④</span><strong>備註填寫</strong>需修改者請在備註欄輸入建議；無修改則不必填寫</div>
+        <div class="step"><span class="step-num">⑤</span><strong>匯出並回傳</strong>完成後點選「匯出 CSV」並寄送給研究者</div>
+      </div>
+    </section>
+
+    <div id="cardList"></div>
+  </main>
+
+  <div class="export-bar">
+    <div class="export-bar-inner">
+      <div class="export-hint" id="exportHint">尚有陳述句未完成評分</div>
+      <button class="btn-export" id="exportBtn">匯出 CSV ↓</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ EXPORT MODAL ============ -->
+<div class="modal-overlay" id="exportModal">
+  <div class="modal-box">
+    <div class="check-icon">✓</div>
+    <h3>CSV 已下載完成！</h3>
+    <p>請將剛才下載的 CSV 檔案寄送給研究者 <strong id="researcherNameInModal"></strong>，以便彙整所有專家的意見。</p>
+    <div class="email-row">
+      <span id="researcherEmailInModal"></span>
+      <button id="copyEmailBtn">複製</button>
+    </div>
+    <ul class="modal-steps">
+      <li><span class="n">1</span>開啟您的 Email 程式（Gmail、Outlook 等）</li>
+      <li><span class="n">2</span>收件人填入上方地址</li>
+      <li><span class="n">3</span>將下載的 CSV 檔案加入附件</li>
+      <li><span class="n">4</span>送出即完成！</li>
+    </ul>
+    <div class="modal-actions">
+      <a href="#" class="btn-mailto" id="mailtoBtn">開啟 Email 程式寄送</a>
+      <button class="btn-close-modal" id="closeModalBtn">我已了解，關閉</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   設定區：之後要換內容，只要修改這裡即可
+   ========================================================= */
+const RESEARCHER = {
+  name: "林俊仁",              // 研究者姓名
+  email: "jiunren.lin@gmail.com" // 研究者 Email
+};
+
+// 範例陳述句資料 -- 之後直接替換這個陣列即可
+const STATEMENTS = [
+  { id: 1, text: "AI使研究者得以突破人工作業的規模限制，對海量資料進行傳統方法無法實現的大規模分析" },
+  { id: 2, text: "在大數據時代AI資料分析自動化已從「有益」升格為「必要」，龐大的資料規模使單靠人工流程的傳統分析方法已無法支撐資料驅動的研究決策" },
+  { id: 3, text: "AI工具降低了分析的技術門檻，消弭了人文研究者與資料驅動方法之間的數位落差" },
+  { id: 4, text: "AI辨識與轉錄技術讓資料得以快速、準確地數位化，使研究者與公眾均能更有效率地互動探索" },
+  { id: 5, text: "大型語言模型能勝任標注、分類、翻譯等研究任務，效果超過傳統方法，能補足甚至替代人工" },
+  { id: 6, text: "AI的零樣本學習能力使其可在未見過的新情境中分析資料，對跨學科研究與質性研究特別具有價值" },
+  { id: 7, text: "生成式AI在評估複雜情感動態方面具有研究潛力，能無需人工介入地自動評估大量文本" },
+  { id: 8, text: "學術界對AI相關議題的研究與集體因應，仍嚴重落後於技術發展" },
+  { id: 9, text: "演算法推薦系統主要依商業邏輯設計，其對認識論標準的影響鮮少被研究者系統性評估，形成研究盲區" },
+  { id: 10, text: "AI正根本性地改變研究性質與學術領域，學術界必須重新評估既有理論與框架的適用性" },
+  { id: 11, text: "AI與演算法本身應成為理論化研究的對象，而非僅被視為工具、管道或雜訊" },
+  { id: 12, text: "AI是典範轉移的力量，能重塑知識生產的研究方法" },
+  { id: 13, text: "幻覺是大型語言模型無法完全消除的根本限制" },
+  { id: 14, text: "AI的幻覺問題可能在質性研究中產生不實結果，若未受人類的核查，將危及研究的可信度" },
+  { id: 15, text: "人文領域大量資料未數位化，使AI在非主流議題上的幻覺風險特別高" },
+  { id: 16, text: "AI傾向摘要化、捨棄或添加細節，缺乏深度、完整性與可靠性" },
+  { id: 17, text: "大型語言模型結構上迎合訓練資料的主流敘事，難以像研究者一樣逆向解讀資料" },
+  { id: 18, text: "AI的黑箱使研究過程不透明，限制其在學術研究中的應用" },
+  { id: 19, text: "提升AI模型的可解釋性與透明度應該是優先推動的方向" },
+  { id: 20, text: "現有XAI大部分由軍事組織資助，引發學術獨立性疑慮" },
+  { id: 21, text: "AI使相同輸入產生不同結果，對研究可重製性構成結構性挑戰" },
+  { id: 22, text: "AI無法捕捉文本在其社會脈絡下的深度與複雜性，無法完全像人類一樣掌握質性細節" },
+  { id: 23, text: "AI依賴統計模式運作，並非真正的理解或認知，不具備人類的世界理解能力" },
+  { id: 24, text: "資料與人工標注的品質對AI研究結果的可靠性至關重要" },
+  { id: 25, text: "研究者必須主動評估並透徹理解AI的能力與侷限，而非假設其可信" },
+  { id: 26, text: "AI模型對於語言與歷史場景掌握的侷限、缺乏人文視角、過度依賴稀缺數據的推論風險，且技術上難以解讀古文字或跨歷史時段分析" },
+  { id: 27, text: "對AI散播錯誤資訊的恐懼被過度誇大，經系統性評估的AI可以是可靠的資訊來源" },
+  { id: 28, text: "以同儕審查文獻為基礎的學術專用AI，比通用生成式AI更值得研究者信賴" },
+  { id: 29, text: "通用型AI工具（如ChatGPT）缺乏透明度、脈絡理解能力及可回溯性，因此不適合用於需要可驗證推理與可重製性的嚴謹質性研究" },
+  { id: 30, text: "AI工具在質性分析上有四項根本限制：缺乏人類判斷與生活經驗、詮釋流於表面或去脈絡化、對資料與提示詞的偏見敏感性、以及無法支援研究的反身性與倫理品質控制" },
+  { id: 31, text: "AI不同於靜態分析工具，能和研究者進行迭代式的追問與對話，能協助研究者形成更有深度、多層次的詮釋" },
+  { id: 32, text: "AI摘要只能作為研究起點，引用前必須閱讀原始文獻，不可直接引用" },
+  { id: 33, text: "AI輸出內嵌訓練資料的偏見，影響其作為研究工具的客觀性，可能扭曲研究詮釋並強化刻板印象" },
+  { id: 34, text: "AI模型在大量訓練資料的融合效應下，傾向產出「平均觀點」，且會迎合使用者提示語中的偏好而非提供最中立答案，因此AI強化偏見的風險是學術研究者必須正視的結構性問題" },
+  { id: 35, text: "AI訓練資料內嵌的偏見與資料既有的偏見相互疊加，複合效應難以評估" },
+  { id: 36, text: "所有AI模型都內嵌單一世界觀而非多元文化視角，研究者若持續以提示詞修改來識別模型的偏見缺口，應反思這是否是真正推進數位方法的正確路徑" },
+  { id: 37, text: "AI系統高度依賴並反映開發者的世界觀，其嵌入的是工程師/特定意識型態的偏見，而非客觀中立的科學工具" },
+  { id: 38, text: "以資料驅動演算法對個體進行細粒度刻畫的資料科學工具主義實踐，在追求「克服理論範疇、掌握個體特殊性」的旗幟下，實際上強化了種族、性別與階級歧視的算法化" },
+  { id: 39, text: "AI訓練資料以主流語言為主，使其他少數語言與、冷門議題與在地文化在研究中被系統性邊緣化" },
+  { id: 40, text: "AI文獻工具的搜尋/推薦邏輯傾向複製主流觀點、排除出現頻率低與對立的文獻，複製實證主義為導向的知識生產，並限制質性研究的創造性基礎" },
+  { id: 41, text: "AI方法有助於研究者發現身盲點、減少研究者偏見" },
+  { id: 42, text: "AI對質性研究的整合引發一個核心疑慮：以自動化、資料驅動、可重複的方式建構理論，可能標誌著實證主義的復辟，侵蝕質性研究的詮釋深度與建構主義核心" },
+  { id: 43, text: "以預測效用為導向的工具主義演算法文化優先考量預測而非可詮釋的因果模型，這一認識論轉向構成當代AI與資料科學的核心特徵，對社會科學研究具有深遠方法論意涵" },
+  { id: 44, text: "研究者對AI應建立批判性的技術認識論，而非停留在如何操作或糾正錯誤的層次" },
+  { id: 45, text: "平台演算存在性別偏見，根據知名度優先顯示內容會系統性放大女性在學術能見度上的不平等" },
+  { id: 46, text: "AI應定位為輔助研究的工具或助理，而非取代研究者的書寫與判斷" },
+  { id: 47, text: "即使有AI，在各個研究流程階段，人工介入仍是必要且不可取代的" },
+  { id: 48, text: "AI無法獨立進行有學術價值的詮釋，其侷限性本身反而是迫使研究者精進提問技藝的動力" },
+  { id: 49, text: "人類研究者擁有機器學習模型無法完全取代的能力，因此人機協作才是研究的正確框架" },
+  { id: 50, text: "質性研究的社會潛力(去殖民化學習、社會正義、積極參與社區)需要人類研究者的主動投入與共情，這些是AI驅動分析所缺乏的，無法僅憑演算法效率取代" },
+  { id: 51, text: "AI雖可加速研究，但無法取代人類的創造性與批判性思維，也無法發展以學科知識為基礎的學術論證，因此不能取代作者的智識角色" },
+  { id: 52, text: "研究全程應維持人類主導與監督AI，才能確保研究的嚴謹與問責" },
+  { id: 53, text: "AI僅能建議編碼/主題，最終的詮釋與確認決策始終在人類研究者手中，所有AI建議都須經研究者審查、修改或拒絕" },
+  { id: 54, text: "AI演算法的偏誤根源往往來自人類社會而非AI本身" },
+  { id: 55, text: "AI在性別與歧視議題研究中的應用應保持高度審慎，讓AI全權分析涉及性別平等的資料可能帶來難以偵測的偏見，應以人工分析為主、AI比對為輔" },
+  { id: 56, text: "研究者對納入研究的所有AI內容負完全責任，此責任不可轉讓" },
+  { id: 57, text: "AI輸出品質高度依賴人類問題框架的本質" },
+  { id: 58, text: "研究者必須培養批判性審查AI輸出、辨識幻覺與偏見的能力" },
+  { id: 59, text: "研究者多以「使用者」而非「貢獻者」身份接觸AI，形成對科技公司的依賴並限制專業自主" },
+  { id: 60, text: "使用AI必須透明揭露其使用範疇與目的，透明度是學術誠信的必要條件" },
+  { id: 61, text: "AI使用的規範應鼓勵透明揭露而非一律禁止，過度禁止反而降低揭露意願" },
+  { id: 62, text: "AI使用的揭露應載明工具、版本、日期與提示詞，使研究過程可受檢驗" },
+  { id: 63, text: "AI涉及資料分析、方法或寫作時須揭露，僅用於語法潤飾則不需" },
+  { id: 64, text: "不同學門對AI參與研究揭露程度的要求應有所區分，而非一體適用" },
+  { id: 65, text: "生成式AI不得被列為論文作者，因其無法對研究成果承擔責任" },
+  { id: 66, text: "以他人成果訓練AI後獨自署名更涉及學術剽竊" },
+  { id: 67, text: "學術界應開發工具加以驗證AI產出的虛假資料" },
+  { id: 68, text: "生成式AI不應僅被視為工具，其能力已延伸至發想、修改、提供意見等高層次協作" },
+  { id: 69, text: "審稿人不應將未發表稿件上傳至開放AI工具，否則造成保密威脅且損及作者權益" },
+  { id: 70, text: "現行AI規範對作者嚴格、對審查端卻缺乏約束，且忽略作者的自辯救濟權益，應同步強化規範" },
+  { id: 71, text: "IRB審查機制應系統性納入AI研究的工具特性與新型風險" },
+  { id: 72, text: "AI方法的速度、規模與不透明性使媒體使用者與機構難以對資料使用給予真正的知情同意，形成治理盲區" },
+  { id: 73, text: "涉及參與者資料的AI研究，必須在知情同意中明確聲明AI的目的、已知限制與風險緩解措施，告知資料將如何被AI使用、且一旦共享即無法撤回，並符合倫理審查與去識別要求" },
+  { id: 74, text: "敏感研究資料不應輸入開放式AI，機構應建立可掌控資料的封閉式研究環境" },
+  { id: 75, text: "AI研究的資料授權涉及多重層次，應在資料進入AI之前處理完畢" },
+  { id: 76, text: "AI模型的授權與其訓練產出的資料授權性質不同，需要分開討論" },
+  { id: 77, text: "唯有高品質、結構良好、可及且標注完善的資料，才能有效應用於AI輔助流程" },
+  { id: 78, text: "AI技術的發展有加劇資料不平等與剝削原住民社群資料的潛在風險，應建立以人為本的資料治理框架" },
+  { id: 79, text: "各學門應制定符合自身特性的AI倫理規範，由下而上凝聚共識並定期更新" },
+  { id: 80, text: "AI倫理規範應區分「AI作為研究工具」與「AI作為研究對象」兩種脈絡，各自制定不同的倫理守則，以使規範更精確" },
+  { id: 81, text: "AI倫理規範需要定期更新以因應技術快速演變" },
+  { id: 82, text: "期刊應努力在AI使用倫理準則上達成一致共識，降低研究者的遵循負擔" },
+  { id: 83, text: "學術機構應在驗證AI工具與引導使用上扮演積極角色，同時管理AI工具所帶來的風險" },
+  { id: 84, text: "AI系統的開發與使用必須以尊重人權、民主與法治為絕對前提" },
+  { id: 85, text: "生成式AI在教育中的應用應立基於人文主義視角，確保其促進人類能動性、包容性、公平與文化多元性" },
+  { id: 86, text: "AI的發展與治理存在顯著的全球南北落差，危害集中於邊緣群體" },
+  { id: 87, text: "AI治理需保護公眾與基本價值" },
+  { id: 88, text: "過度規範可能扼殺創新，AI 規範應以不具強制性的指導原則和產業自律為主" },
+  { id: 89, text: "人文社會科學的視角在AI政策制定中被系統性忽視" },
+  { id: 90, text: "大學應將生成式AI的負責任使用技能視為研究生培訓的重要一環，因為此能力對研究生的未來學術與職涯發展具有重要意義" },
+  { id: 91, text: "生成式AI雖解放部分低階認知負擔，但學生仍須學習如何駕馭與評估這些工具，課程應嵌入使用與評估AI的機會並反思其對學習本質的影響" },
+  { id: 92, text: "大學不應禁止生成式AI，而應支持師生有效、合乎倫理且透明地使用，培養負責任使用AI的素養並確保平等取用機會" },
+  { id: 93, text: "生成式AI的廣泛使用強化了AI素養教育的迫切性；若缺乏使用規範與批判意識，學生可能在未獨立思考的情況下以AI產出取代原創作業。" },
+  { id: 94, text: "學術課程應納入兼顧技術能力與批判視角的AI教育" },
+  { id: 95, text: "過度依賴AI將損害研究者的批判性思維與獨立分析能力" },
+  { id: 96, text: "電腦科學與人文社會科學的跨學科協作是AI研究的關鍵，但目前極為稀少" },
+  { id: 97, text: "跨學科AI合作的核心挑戰在於不同認識論文化之間的資料結構、研究方法論、術語與發表策略的根本性差異，需要參與者在協調共同目標時持續進行認知協商" },
+  { id: 98, text: "AI研究的概念與術語缺乏整合，知識碎片化阻礙領域發展" },
+  { id: 99, text: "現有AI相關研究普遍缺乏理論基礎與方法論嚴謹性" },
+  { id: 100, text: "AI生成內容的普及，正在重塑人們發現與使用資料的方式，侵蝕傳統研究方法的測量指標" },
+  { id: 101, text: "AI作為「研究工具」與「研究對象」的倫理應分開討論" },
+  { id: 102, text: "AI應被放回歷史脈絡中理解其權力關係，而非單純視其為創新科技" },
+  { id: 103, text: "學術界與產業的AI合作對雙方有價值，但有損及研究獨立性的風險" },
+  { id: 104, text: "AI的能源成本是研究不可忽視的倫理代價" },
+  { id: 105, text: "負責任的學術AI開發應優先選擇小型適當模型、快取可重複的回應、精簡提示詞，以降低計算資源消耗，而非盲目追求規模最大化" },
+  { id: 106, text: "取用AI的成本高昂，將擴大資源豐富與資源有限研究者之間的能力差距，可能造成學術資源的嚴重不均" },
+  { id: 107, text: "AI的書目與文獻能力仍不及傳統研究方法，研究者仍需依賴傳統研究方法與學科知識才能進行嚴謹的文獻蒐集" },
+  { id: 108, text: "AI本質上是回溯而非前瞻的知識系統，無法追蹤當代最新論辯的前沿" },
+  { id: 109, text: "研究發現必須以傳統知識積累為基礎而非以AI工具為基礎" },
+  { id: 110, text: "主題模型能快速梳理海量文獻，但其輸出必須由具備脈絡知識的研究者詮釋" },
+  { id: 111, text: "生成式AI有助於克服非英語系學者的語言劣勢" },
+  { id: 112, text: "AI研究與教學存在批判性與應用性兩種視角：前者關注社會後果，後者聚焦資料處理、自動化內容與事實查核三項技能" },
+  { id: 113, text: "商業AI因演算法訓練資料不透明且可能隨時更新，研究者宜優先採用開源工具" },
+  { id: 114, text: "研究者應探索如何以研究成果指導開發能促進公共利益的AI應用與服務" },
+  { id: 115, text: "情感辨識AI產業目前由過度炒作而非科學實證所驅動，僅靠更強大的演算法無法解決人類情緒的複雜性問題" },
+  { id: 116, text: "AI有潛力做出非凡且出人意料的創意連結，大幅拓寬研究的可能性" },
+  { id: 117, text: "AI方法在處理訪談資料時必須嚴格堅守不改變原始證詞的原則，系統不能摘要、修改或重新詮釋訪談內容，確保受訪者原聲未受干擾" },
+  { id: 118, text: "選擇傳統程式碼或LLM進行歷史資料擷取是多維度決策問題，需同時考量開發時間、專業需求、結果精確度、效率、資源需求與金錢成本，在特定任務上兩者混合使用是最佳策略" },
+  { id: 119, text: "AI的「智能」應以思維過程而非輸出表現來衡量，以輸出技能作為AI智能的衡量標準，實際上衡量的是工程師的智能而非機器本身" },
+  { id: 120, text: "生成式AI的輸出物可被「重新利用」為研究材料或批判對象，用以揭露AI系統內嵌的種族與性別偏見，成為人社跨學科研究的新興實踐" },
+  { id: 121, text: "若 AI 開始生成超出人類既有知識範圍的內容，將對學術研究構成危險" },
+  { id: 122, text: "以領域特定（非生成式）AI建構跨語言學術文獻推薦工具，能真實索引多語言研究並以主題相似性排序，是改善社會科學跨語言知識整合的更有前途途徑" },
+  { id: 123, text: "AI代理人已展現出模擬個人人格及社會行為的能力，使以AI代理人可能取代研究參與者" },
+  { id: 124, text: "AI工具應以「與之共思」而非「代為思考」的方式被納入研究，若淪為官僚化工具將威脅研究品質與學術身份認同" },
+  { id: 125, text: "AI可以標準化過程，但無法消除資料或問題框架中嵌入的偏見，具有深厚質性研究經驗的研究者認為主觀偏見正是質性探究不可或缺且有價值的部分，而非AI可以優化的缺陷" },
+  { id: 126, text: "生成式AI構成一種新興媒介，學者有必要正視其中建構的認識論與本體論——不僅是為了批判，更是為了揭露其（非）歷史性預設" },
+  { id: 127, text: "AI對研究生產力的提升效果尚未在科學、研究與創新領域得到明確驗證，廣泛採用不等於生產力提升，甚至可能因適應挑戰帶來負面影響" },
+  { id: 128, text: "機器學習技術昂貴、碳排放巨大且被設計為服務商業利益，這些成本使學術相容型AI工具的開發成本難以正當化，AI研究工具應由公共機構控制而非私人商業化" },
+  { id: 129, text: "AI的透明度在本質上具有挑戰性，但以引用原文段落與頁碼、並為每個AI建議的編碼提供選取理由說明的設計，可有效支援研究者的核查與調整工作" },
+  { id: 130, text: "研究者使用AI輔助文獻搜尋時不應陷入確認偏誤，必須主動尋找持不同立場的論文，而非僅搜集支持自身觀點的文獻" },
+  { id: 131, text: "AI完全依賴每次互動中提供的文字脈絡運作，不同於仰賴累積知識與心智圖式的人類研究者" },
+  { id: 132, text: "生成式AI改變了學者的角色定位：若AI在獲得足夠正確資料後能生成相當品質的論文，學者的核心競爭力將從轉向對問題的判斷力與研究設計能力" },
+  { id: 133, text: "解決AI在研究中生成偏誤的根本之道，在於由學界共同建立專業化標準，以此基礎訓練領域專門的AI，並作為開源且非營利的公共資源，因為只有可驗證的公開材料才具有科學研究價值。" },
+  { id: 134, text: "研究者對文本理解能力的下降早於AI的出現，不應將此完全歸咎於AI" },
+  { id: 135, text: "AI研究中的「受試者」概念需要擴展：公開資料中個人的輪廓與人口統計特徵，若成為研究對象，應考慮是否也適用受試者倫理保護原則與知情同意要求。" },
+  { id: 136, text: "AI介入文獻探討的方式，若導致研究者省略對文獻的直接閱讀與批判性解讀，可能產生「以訛傳訛」的學術錯誤累積效應，並使問題設定與理論討論出現斷裂。" },
+  { id: 137, text: "AI偵測工具的標準尚未統一，且同一工具在不同時間對同一文件的偵測結果不一致，這使得期刊編輯在面對疑似AI生成的投稿時，無法以AI偵測結果作為可靠的判定依據。" },
+  { id: 138, text: "學術自律是AI倫理的根本基礎，培養新進學者在研究養成階段就建立自律習慣，遠比事後花費大量成本進行防弊更有效率；師徒制的慢工精神在AI時代尤為珍貴。" }
+];
+
+/* =========================================================
+   狀態管理
+   ========================================================= */
+let expertName = "";
+// responses[id] = { nature, necessity, noEdit, remark }
+const responses = {};
+STATEMENTS.forEach(s => { responses[s.id] = { nature: null, necessity: null, noEdit: false, remark: "" }; });
+
+/* =========================================================
+   DOM refs
+   ========================================================= */
+const loginScreen = document.getElementById('loginScreen');
+const appScreen = document.getElementById('appScreen');
+const expertNameInput = document.getElementById('expertNameInput');
+const loginBtn = document.getElementById('loginBtn');
+const expertNameDisplay = document.getElementById('expertNameDisplay');
+const cardList = document.getElementById('cardList');
+const statTotal = document.getElementById('statTotal');
+const statRated = document.getElementById('statRated');
+const statPending = document.getElementById('statPending');
+const statPct = document.getElementById('statPct');
+const exportHint = document.getElementById('exportHint');
+const exportBtn = document.getElementById('exportBtn');
+const exportModal = document.getElementById('exportModal');
+const researcherNameInModal = document.getElementById('researcherNameInModal');
+const researcherEmailInModal = document.getElementById('researcherEmailInModal');
+const copyEmailBtn = document.getElementById('copyEmailBtn');
+const mailtoBtn = document.getElementById('mailtoBtn');
+const closeModalBtn = document.getElementById('closeModalBtn');
+
+researcherNameInModal.textContent = RESEARCHER.name;
+researcherEmailInModal.textContent = RESEARCHER.email;
+
+/* =========================================================
+   登入
+   ========================================================= */
+function tryLogin(){
+  const val = expertNameInput.value.trim();
+  if(!val){ expertNameInput.focus(); return; }
+  expertName = val;
+  expertNameDisplay.textContent = expertName;
+  loginScreen.style.display = 'none';
+  appScreen.style.display = 'block';
+  renderCards();
+  updateStats();
+}
+loginBtn.addEventListener('click', tryLogin);
+expertNameInput.addEventListener('keydown', e => { if(e.key === 'Enter') tryLogin(); });
+
+/* =========================================================
+   卡片渲染
+   ========================================================= */
+const NECESSITY_TAGS = {1:"非常不必要",2:"不必要",3:"普通",4:"必要",5:"非常必要"};
+const NATURE_LABELS = { positive:"正向", negative:"負向", neutral:"中性" };
+
+function renderCards(){
+  cardList.innerHTML = STATEMENTS.map(s => cardTemplate(s)).join('');
+  STATEMENTS.forEach(s => bindCardEvents(s.id));
+}
+
+function cardTemplate(s){
+  return `
+  <article class="card" id="card-${s.id}" data-id="${s.id}">
+    <div class="card-head">
+      <div class="card-index mono">${String(s.id).padStart(2,'0')}</div>
+      <div class="card-text">${escapeHtml(s.text)}</div>
+    </div>
+
+    <div class="field-block">
+      <span class="row-label">① 性質確認</span>
+      <div class="pill-group" data-role="nature-group">
+        <button type="button" class="pill" data-val="positive">正向</button>
+        <button type="button" class="pill" data-val="negative">負向</button>
+        <button type="button" class="pill" data-val="neutral">中性</button>
+      </div>
+    </div>
+
+    <div class="field-block">
+      <span class="row-label">② 必要性評分（1 = 非常不必要，5 = 非常必要）</span>
+      <div class="necessity-scale" data-role="necessity-group">
+        <div class="track"></div>
+        ${[1,2,3,4,5].map(n => `
+          <div class="necessity-dot-wrap" data-val="${n}">
+            <div class="necessity-dot mono">${n}</div>
+            <div class="necessity-tag">${NECESSITY_TAGS[n]}</div>
+          </div>`).join('')}
+      </div>
+    </div>
+
+    <div class="field-block">
+      <label class="noedit-row" data-role="noedit-row">
+        <input type="checkbox" data-role="noedit-checkbox">
+        <span>③ 此陳述句無需修改</span>
+      </label>
+    </div>
+
+    <div class="field-block">
+      <span class="row-label">④ 備註（需修改者請輸入建議，無修改則不必填寫）</span>
+      <textarea class="remark" data-role="remark" placeholder="請輸入修改建議……"></textarea>
+    </div>
+  </article>`;
+}
+
+function escapeHtml(str){
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+/* =========================================================
+   卡片事件綁定
+   ========================================================= */
+function bindCardEvents(id){
+  const card = document.getElementById(`card-${id}`);
+  const r = responses[id];
+
+  // 性質 pills
+  const natureBtns = card.querySelectorAll('[data-role="nature-group"] .pill');
+  natureBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      r.nature = btn.dataset.val;
+      natureBtns.forEach(b => b.classList.toggle('active', b === btn));
+      onCardChange(id);
+    });
+  });
+
+  // 必要性 dots
+  const dots = card.querySelectorAll('[data-role="necessity-group"] .necessity-dot-wrap');
+  dots.forEach(dot => {
+    dot.addEventListener('click', () => {
+      r.necessity = parseInt(dot.dataset.val, 10);
+      dots.forEach(d => d.classList.toggle('active', d === dot));
+      onCardChange(id);
+    });
+  });
+
+  // 無需修改 checkbox
+  const noEditRow = card.querySelector('[data-role="noedit-row"]');
+  const noEditCheckbox = card.querySelector('[data-role="noedit-checkbox"]');
+  const remarkBox = card.querySelector('[data-role="remark"]');
+  noEditCheckbox.addEventListener('change', () => {
+    r.noEdit = noEditCheckbox.checked;
+    noEditRow.classList.toggle('checked', r.noEdit);
+    remarkBox.disabled = r.noEdit;
+    if(r.noEdit){ remarkBox.value = ''; r.remark = ''; }
+    onCardChange(id);
+  });
+
+  // 備註
+  remarkBox.addEventListener('input', () => {
+    r.remark = remarkBox.value;
+  });
+}
+
+function onCardChange(id){
+  const card = document.getElementById(`card-${id}`);
+  const r = responses[id];
+  const complete = !!(r.nature && r.necessity);
+  card.classList.toggle('is-complete', complete);
+  card.classList.toggle('is-pending', !complete);
+  updateStats();
+}
+
+/* =========================================================
+   進度統計
+   ========================================================= */
+function updateStats(){
+  const total = STATEMENTS.length;
+  const rated = STATEMENTS.filter(s => responses[s.id].nature && responses[s.id].necessity).length;
+  const pending = total - rated;
+  const pct = total === 0 ? 0 : Math.round((rated/total)*100);
+
+  statTotal.textContent = total;
+  statRated.textContent = rated;
+  statPending.textContent = pending;
+  statPct.textContent = pct + '%';
+
+  exportHint.textContent = pending === 0
+    ? '所有陳述句皆已完成評分，可以匯出囉！'
+    : `尚有 ${pending} 條陳述句未完成評分`;
+}
+
+/* =========================================================
+   CSV 匯出
+   ========================================================= */
+function buildCsv(){
+  const headers = ['專家姓名','編號','陳述句內容','性質','必要性評分','無需修改','備註'];
+  const rows = STATEMENTS.map(s => {
+    const r = responses[s.id];
+    return [
+      expertName,
+      s.id,
+      s.text,
+      r.nature ? NATURE_LABELS[r.nature] : '',
+      r.necessity ?? '',
+      r.noEdit ? '是' : '否',
+      r.remark || ''
+    ];
+  });
+  const csvLines = [headers, ...rows].map(row =>
+    row.map(csvEscape).join(',')
+  );
+  return '\uFEFF' + csvLines.join('\r\n'); // BOM for Excel 中文相容
+}
+
+function csvEscape(val){
+  const s = String(val ?? '');
+  if(/[",\n]/.test(s)){
+    return '"' + s.replace(/"/g,'""') + '"';
+  }
+  return s;
+}
+
+function downloadCsv(){
+  const csv = buildCsv();
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const safeExpert = expertName.replace(/[^\w\u4e00-\u9fa5]+/g,'_');
+  const dateStr = new Date().toISOString().slice(0,10);
+  a.href = url;
+  a.download = `Q方法陳述句審查_${safeExpert}_${dateStr}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+exportBtn.addEventListener('click', () => {
+  downloadCsv();
+  openExportModal();
+});
+
+/* =========================================================
+   Modal
+   ========================================================= */
+function openExportModal(){
+  exportModal.classList.add('show');
+  const subject = encodeURIComponent(`Q方法陳述句審查回覆 - ${expertName}`);
+  const body = encodeURIComponent(`${RESEARCHER.name} 您好，\n\n附上我的 Q 方法陳述句審查結果 CSV 檔案，請查收。\n\n${expertName} 敬上`);
+  mailtoBtn.href = `mailto:${RESEARCHER.email}?subject=${subject}&body=${body}`;
+}
+closeModalBtn.addEventListener('click', () => exportModal.classList.remove('show'));
+exportModal.addEventListener('click', e => { if(e.target === exportModal) exportModal.classList.remove('show'); });
+
+copyEmailBtn.addEventListener('click', () => {
+  navigator.clipboard.writeText(RESEARCHER.email).then(() => {
+    const original = copyEmailBtn.textContent;
+    copyEmailBtn.textContent = '已複製';
+    setTimeout(() => copyEmailBtn.textContent = original, 1500);
+  });
+});
+</script>
+</body>
+</html>
