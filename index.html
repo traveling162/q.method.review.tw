@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>陳述句．專家審查系統</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F6F3EC;
+    --paper-raised:#FDFBF6;
+    --ink:#20262E;
+    --ink-soft:#5C6570;
+    --ink-faint:#9AA1A9;
+    --line:#DCD5C4;
+    --line-strong:#C7BEA8;
+    --red:#A93F2B;
+    --red-soft:#F1DFD8;
+    --teal:#2E6459;
+    --teal-soft:#DCE9E4;
+    --amber:#8A6A1F;
+    --amber-soft:#EFE3C4;
+    --radius:3px;
+    --shadow:0 1px 2px rgba(32,38,46,0.06), 0 6px 20px rgba(32,38,46,0.05);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+  ::selection{background:var(--red-soft);}
+
+  /* ---------- Utility ---------- */
+  .mono{font-family:'JetBrains Mono',monospace;}
+  .serif{font-family:'Source Serif 4',serif;}
+  button{font-family:inherit;cursor:pointer;}
+  a{color:inherit;}
+
+  /* ---------- Login Screen ---------- */
+  #loginScreen{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+    position:relative;
+    overflow:hidden;
+  }
+  #loginScreen::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background-image:
+      repeating-linear-gradient(0deg, transparent, transparent 27px, var(--line) 28px);
+    opacity:0.35;
+    pointer-events:none;
+  }
+  .login-card{
+    position:relative;
+    background:var(--paper-raised);
+    border:1px solid var(--line-strong);
+    border-radius:var(--radius);
+    padding:48px 44px 40px;
+    max-width:440px;
+    width:100%;
+    box-shadow:var(--shadow);
+  }
+  .login-card::before{
+    content:"";
+    position:absolute;
+    top:0; left:28px;
+    width:1px; height:100%;
+    background:var(--red-soft);
+  }
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:var(--red);
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-bottom:18px;
+  }
+  .eyebrow::before{
+    content:"";
+    width:16px;height:1px;
+    background:var(--red);
+    display:inline-block;
+  }
+  .login-card h1{
+    font-family:'Source Serif 4',serif;
+    font-size:26px;
+    font-weight:600;
+    line-height:1.3;
+    margin:0 0 10px;
+  }
+  .login-card p{
+    color:var(--ink-soft);
+    font-size:14px;
+    line-height:1.7;
+    margin:0 0 28px;
+  }
+  .field-label{
+    font-size:12px;
+    color:var(--ink-soft);
+    margin-bottom:8px;
+    display:block;
+    font-weight:500;
+  }
+  #expertNameInput{
+    width:100%;
+    padding:13px 14px;
+    border:1px solid var(--line-strong);
+    border-radius:var(--radius);
+    background:#fff;
+    font-size:15px;
+    font-family:'Source Serif 4',serif;
+    color:var(--ink);
+    margin-bottom:22px;
+  }
+  #expertNameInput:focus{outline:2px solid var(--teal); outline-offset:1px;}
+  .btn-primary{
+    width:100%;
+    padding:14px;
+    background:var(--ink);
+    color:var(--paper-raised);
+    border:none;
+    border-radius:var(--radius);
+    font-size:14px;
+    font-weight:600;
+    letter-spacing:0.02em;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    transition:background .15s ease;
+  }
+  .btn-primary:hover{background:var(--red);}
+  .btn-primary:disabled{background:var(--ink-faint); cursor:not-allowed;}
+
+  /* ---------- App Shell ---------- */
+  #appScreen{display:none;}
+  header.topbar{
+    position:sticky; top:0; z-index:20;
+    background:rgba(246,243,236,0.92);
+    backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--line-strong);
+    padding:14px 28px;
+  }
+  .topbar-inner{
+    max-width:880px;
+    margin:0 auto;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    flex-wrap:wrap;
+  }
+  .brand{display:flex; align-items:center; gap:10px;}
+  .brand-mark{
+    width:26px;height:26px;
+    border:1.5px solid var(--ink);
+    border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Source Serif 4',serif;
+    font-size:13px;font-weight:700;
+    flex-shrink:0;
+  }
+  .brand-text{font-size:13px; color:var(--ink-soft);}
+  .brand-text strong{color:var(--ink); font-weight:600;}
+  .expert-badge{
+    font-size:12px;
+    color:var(--ink-soft);
+    display:flex;align-items:center;gap:6px;
+  }
+  .expert-badge strong{color:var(--ink); font-weight:600;}
+
+  .stats-bar{
+    max-width:880px;
+    margin:0 auto;
+    padding:18px 28px 0;
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:1px;
+    background:var(--line-strong);
+    border:1px solid var(--line-strong);
+    border-radius:var(--radius);
+    overflow:hidden;
+  }
+  .stat{
+    background:var(--paper-raised);
+    padding:14px 16px;
+    text-align:left;
+  }
+  .stat .num{
+    font-family:'Source Serif 4',serif;
+    font-size:24px;
+    font-weight:600;
+    line-height:1;
+  }
+  .stat .lbl{
+    font-size:10.5px;
+    color:var(--ink-soft);
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+    margin-top:6px;
+  }
+  .stat.pct .num{color:var(--teal);}
+
+  main{
+    max-width:880px;
+    margin:0 auto;
+    padding:26px 28px 100px;
+  }
+
+  .intro-panel{
+    background:var(--paper-raised);
+    border:1px solid var(--line-strong);
+    border-radius:var(--radius);
+    padding:26px 28px;
+    margin-bottom:32px;
+  }
+  .intro-panel h2{
+    font-family:'Source Serif 4',serif;
+    font-size:19px;
+    margin:0 0 10px;
+  }
+  .intro-panel p{
+    font-size:13.5px;
+    line-height:1.85;
+    color:var(--ink-soft);
+    margin:0 0 20px;
+  }
+  .steps{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:14px;
+  }
+  .step{font-size:12px; color:var(--ink-soft); line-height:1.6;}
+  .step .step-num{
+    font-family:'Source Serif 4',serif;
+    font-size:17px;
+    color:var(--red);
+    font-weight:600;
+    display:block;
+    margin-bottom:4px;
+  }
+  .step strong{display:block; color:var(--ink); font-weight:600; margin-bottom:2px;}
+
+  /* ---------- Statement Card ---------- */
+  .card{
+    background:var(--paper-raised);
+    border:1px solid var(--line-strong);
+    border-radius:var(--radius);
+    margin-bottom:16px;
+    padding:22px 26px 24px;
+    position:relative;
+    transition:border-color .15s ease;
+  }
+  .card.is-complete{border-left:3px solid var(--teal);}
+  .card.is-pending{border-left:3px solid var(--line-strong);}
+
+  .card-head{
+    display:flex;
+    gap:14px;
+    margin-bottom:18px;
+  }
+  .card-index{
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;
+    color:var(--ink-faint);
+    padding-top:3px;
+    flex-shrink:0;
+    min-width:26px;
+  }
+  .card-text{
+    font-family:'Source Serif 4',serif;
+    font-size:16.5px;
+    line-height:1.65;
+    color:var(--ink);
+  }
+
+  .row-label{
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+    color:var(--ink-faint);
+    margin-bottom:9px;
+    display:block;
+  }
+  .field-block{margin-bottom:18px;}
+  .field-block:last-child{margin-bottom:0;}
+
+  /* nature pills */
+  .pill-group{display:flex; gap:8px;}
+  .pill{
+    flex:1;
+    padding:9px 4px;
+    text-align:center;
+    border:1px solid var(--line-strong);
+    border-radius:var(--radius);
+    background:transparent;
+    font-size:13px;
+    color:var(--ink-soft);
+    transition:all .12s ease;
+  }
+  .pill:hover{border-color:var(--ink-soft);}
+  .pill.active[data-val="positive"]{background:var(--teal-soft); border-color:var(--teal); color:var(--teal); font-weight:600;}
+  .pill.active[data-val="negative"]{background:var(--red-soft); border-color:var(--red); color:var(--red); font-weight:600;}
+  .pill.active[data-val="neutral"]{background:var(--amber-soft); border-color:var(--amber); color:var(--amber); font-weight:600;}
+
+  /* necessity dial */
+  .necessity-scale{
+    display:flex;
+    align-items:center;
+    gap:0;
+    position:relative;
+  }
+  .necessity-scale .track{
+    position:absolute;
+    top:9px; left:9px; right:9px;
+    height:1px;
+    background:var(--line-strong);
+    z-index:0;
+  }
+  .necessity-dot-wrap{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:8px;
+    position:relative;
+    z-index:1;
+  }
+  .necessity-dot{
+    width:19px; height:19px;
+    border-radius:50%;
+    border:1.5px solid var(--line-strong);
+    background:var(--paper-raised);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'JetBrains Mono',monospace;
+    font-size:10px;
+    color:var(--ink-faint);
+    transition:all .12s ease;
+  }
+  .necessity-dot-wrap:hover .necessity-dot{border-color:var(--ink-soft); color:var(--ink-soft);}
+  .necessity-dot-wrap.active .necessity-dot{
+    background:var(--red);
+    border-color:var(--red);
+    color:#fff;
+    transform:scale(1.12);
+  }
+  .necessity-tag{font-size:9.5px; color:var(--ink-faint); text-align:center; max-width:60px; line-height:1.3;}
+  .necessity-dot-wrap.active .necessity-tag{color:var(--red); font-weight:600;}
+
+  /* no-edit checkbox */
+  .noedit-row{
+    display:flex; align-items:center; gap:10px;
+    padding:11px 14px;
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    cursor:pointer;
+  }
+  .noedit-row input{width:16px;height:16px; accent-color:var(--teal);}
+  .noedit-row span{font-size:13px; color:var(--ink-soft);}
+  .noedit-row.checked{background:var(--teal-soft); border-color:var(--teal);}
+  .noedit-row.checked span{color:var(--teal); font-weight:600;}
+
+  textarea.remark{
+    width:100%;
+    min-height:70px;
+    padding:11px 13px;
+    border:1px solid var(--line-strong);
+    border-radius:var(--radius);
+    font-family:'Inter',sans-serif;
+    font-size:13.5px;
+    color:var(--ink);
+    resize:vertical;
+    background:#fff;
+  }
+  textarea.remark:focus{outline:2px solid var(--teal); outline-offset:1px;}
+  textarea.remark::placeholder{color:var(--ink-faint);}
+  textarea.remark:disabled{background:var(--paper); color:var(--ink-faint);}
+
+  /* ---------- Footer / Export ---------- */
+  .export-bar{
+    position:fixed;
+    bottom:0; left:0; right:0;
+    background:rgba(246,243,236,0.95);
+    backdrop-filter:blur(6px);
+    border-top:1px solid var(--line-strong);
+    padding:14px 28px;
+    display:flex;
+    justify-content:center;
+    z-index:15;
+  }
+  .export-bar-inner{
+    max-width:880px;
+    width:100%;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:16px;
+  }
+  .export-hint{font-size:12px; color:var(--ink-soft);}
+  .btn-export{
+    padding:12px 26px;
+    background:var(--ink);
+    color:var(--paper-raised);
+    border:none;
+    border-radius:var(--radius);
+    font-size:13.5px;
+    font-weight:600;
+    display:flex; align-items:center; gap:8px;
+  }
+  .btn-export:hover{background:var(--red);}
+
+  /* ---------- Modal ---------- */
+  .modal-overlay{
+    display:none;
+    position:fixed; inset:0;
+    background:rgba(32,38,46,0.55);
+    z-index:50;
+    align-items:center; justify-content:center;
+    padding:20px;
+  }
+  .modal-overlay.show{display:flex;}
+  .modal-box{
+    background:var(--paper-raised);
+    border-radius:var(--radius);
+    max-width:440px; width:100%;
+    padding:34px 30px 28px;
+    box-shadow:0 20px 60px rgba(0,0,0,0.25);
+  }
+  .modal-box .check-icon{
+    width:44px;height:44px;
+    border-radius:50%;
+    background:var(--teal-soft);
+    color:var(--teal);
+    display:flex;align-items:center;justify-content:center;
+    font-size:20px;
+    margin-bottom:16px;
+  }
+  .modal-box h3{
+    font-family:'Source Serif 4',serif;
+    font-size:19px;
+    margin:0 0 10px;
+  }
+  .modal-box p{font-size:13.5px; color:var(--ink-soft); line-height:1.75; margin:0 0 18px;}
+  .email-row{
+    display:flex; align-items:center; justify-content:space-between;
+    background:var(--paper);
+    border:1px solid var(--line-strong);
+    border-radius:var(--radius);
+    padding:10px 14px;
+    margin-bottom:18px;
+  }
+  .email-row span{font-family:'JetBrains Mono',monospace; font-size:12.5px;}
+  .email-row button{
+    background:none; border:1px solid var(--line-strong);
+    border-radius:var(--radius);
+    font-size:11px; padding:5px 10px;
+    color:var(--ink-soft);
+  }
+  .email-row button:hover{border-color:var(--ink);}
+  .modal-steps{margin:0 0 22px; padding-left:0; list-style:none;}
+  .modal-steps li{
+    font-size:12.5px; color:var(--ink-soft);
+    display:flex; gap:10px; margin-bottom:8px;
+    align-items:flex-start;
+  }
+  .modal-steps li .n{
+    font-family:'JetBrains Mono',monospace;
+    color:var(--red); flex-shrink:0;
+  }
+  .modal-actions{display:flex; flex-direction:column; gap:10px;}
+  .btn-mailto{
+    text-align:center;
+    padding:12px;
+    background:var(--ink);
+    color:var(--paper-raised);
+    border-radius:var(--radius);
+    font-size:13px; font-weight:600;
+    text-decoration:none;
+  }
+  .btn-mailto:hover{background:var(--red);}
+  .btn-close-modal{
+    text-align:center;
+    padding:12px;
+    background:none;
+    border:1px solid var(--line-strong);
+    border-radius:var(--radius);
+    font-size:13px;
+    color:var(--ink-soft);
+  }
+  .btn-close-modal:hover{border-color:var(--ink);}
+
+  @media (max-width:640px){
+    .steps{grid-template-columns:repeat(2,1fr);}
+    .stats-bar{grid-template-columns:repeat(2,1fr);}
+    .necessity-tag{display:none;}
+    main{padding:22px 16px 110px;}
+    .topbar{padding:14px 16px;}
+    .stats-bar{padding:16px 16px 0;}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    *{transition:none !important;}
+  }
+
+  :focus-visible{outline:2px solid var(--teal); outline-offset:2px;}
+</style>
+</head>
+<body>
+
+<!-- ============ LOGIN SCREEN ============ -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="eyebrow">DELPHI EXPERT REVIEW</div>
+    <h1>陳述句．專家審查系統</h1>
+    <p>請輸入您的姓名以進入審查系統。您的姓名將自動標記在每筆回答上，方便研究者彙整各位專家的意見。</p>
+    <label class="field-label" for="expertNameInput">您的姓名</label>
+    <input type="text" id="expertNameInput" placeholder="例如：王小明" autocomplete="off">
+    <button class="btn-primary" id="loginBtn">確認進入系統 →</button>
+  </div>
+</div>
+
+<!-- ============ APP SCREEN ============ -->
+<div id="appScreen">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="brand-mark">Q</div>
+        <div class="brand-text"><strong>陳述句．專家審查系統</strong></div>
+      </div>
+      <div class="expert-badge">審查專家：<strong id="expertNameDisplay"></strong></div>
+    </div>
+  </header>
+
+  <div class="stats-bar">
+    <div class="stat"><div class="num" id="statTotal">0</div><div class="lbl">總陳述句</div></div>
+    <div class="stat"><div class="num" id="statRated">0</div><div class="lbl">已評分</div></div>
+    <div class="stat"><div class="num" id="statPending">0</div><div class="lbl">待評分</div></div>
+    <div class="stat pct"><div class="num" id="statPct">0%</div><div class="lbl">完成度</div></div>
+  </div>
+
+  <main>
+    <section class="intro-panel">
+      <h2>審查說明</h2>
+      <p>請針對下列每一條陳述句，依序完成性質確認、必要性評分，並視情況填寫修改建議。完成後請點選下方「匯出 CSV」，並依指示寄回研究者。</p>
+      <div class="steps">
+        <div class="step"><span class="step-num">①</span><strong>性質確認</strong>確認每條陳述句的性質（正向、負向、中性）</div>
+        <div class="step"><span class="step-num">②</span><strong>必要性評分</strong>每條陳述句給予 1–5 分（1 = 非常不必要，5 = 非常必要）</div>
+        <div class="step"><span class="step-num">③</span><strong>無需修改確認</strong>若陳述句無需修改，勾選「無需修改」</div>
+        <div class="step"><span class="step-num">④</span><strong>備註填寫</strong>需修改者請在備註欄輸入建議；無修改則不必填寫</div>
+        <div class="step"><span class="step-num">⑤</span><strong>匯出並回傳</strong>完成後點選「匯出 CSV」並寄送給研究者</div>
+      </div>
+    </section>
+
+    <div id="cardList"></div>
+  </main>
+
+  <div class="export-bar">
+    <div class="export-bar-inner">
+      <div class="export-hint" id="exportHint">尚有陳述句未完成評分</div>
+      <button class="btn-export" id="exportBtn">匯出 CSV ↓</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ EXPORT MODAL ============ -->
+<div class="modal-overlay" id="exportModal">
+  <div class="modal-box">
+    <div class="check-icon">✓</div>
+    <h3>CSV 已下載完成！</h3>
+    <p>請將剛才下載的 CSV 檔案寄送給研究者 <strong id="researcherNameInModal"></strong>，以便彙整所有專家的意見。</p>
+    <div class="email-row">
+      <span id="researcherEmailInModal"></span>
+      <button id="copyEmailBtn">複製</button>
+    </div>
+    <ul class="modal-steps">
+      <li><span class="n">1</span>開啟您的 Email 程式（Gmail、Outlook 等）</li>
+      <li><span class="n">2</span>收件人填入上方地址</li>
+      <li><span class="n">3</span>將下載的 CSV 檔案加入附件</li>
+      <li><span class="n">4</span>送出即完成！</li>
+    </ul>
+    <div class="modal-actions">
+      <a href="#" class="btn-mailto" id="mailtoBtn">開啟 Email 程式寄送</a>
+      <button class="btn-close-modal" id="closeModalBtn">我已了解，關閉</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   設定區：之後要換內容，只要修改這裡即可
+   ========================================================= */
+const RESEARCHER = {
+  name: "林俊仁",              // 研究者姓名
+  email: "jiunren.lin@gmail.com" // 研究者 Email
+};
+
+// 範例陳述句資料 -- 之後直接替換這個陣列即可
+const STATEMENTS = [
+  { id: 1, text: "醫學生應能在溝通情境開始前，先向病人自我介紹並確認病人身分。" },
+  { id: 2, text: "醫學生應能使用病人能理解的語言，避免過多專業術語。" },
+  { id: 3, text: "醫學生應能在告知壞消息前，先評估病人與家屬目前的理解程度。" },
+  { id: 4, text: "醫學生應能適時停頓，給予病人消化資訊與提問的時間。" },
+  { id: 5, text: "醫學生應能覺察並回應病人在溝通過程中出現的情緒反應。" },
+  { id: 6, text: "醫學生應能在溝通結束前，摘要重點並確認病人已理解後續安排。" },
+  { id: 7, text: "醫學生應能在涉及生死議題時，尊重病人與家屬的文化與宗教背景。" },
+  { id: 8, text: "醫學生應能清楚說明治療選項的風險與效益，協助病人做出知情選擇。" }
+];
+
+/* =========================================================
+   狀態管理
+   ========================================================= */
+let expertName = "";
+// responses[id] = { nature, necessity, noEdit, remark }
+const responses = {};
+STATEMENTS.forEach(s => { responses[s.id] = { nature: null, necessity: null, noEdit: false, remark: "" }; });
+
+/* =========================================================
+   DOM refs
+   ========================================================= */
+const loginScreen = document.getElementById('loginScreen');
+const appScreen = document.getElementById('appScreen');
+const expertNameInput = document.getElementById('expertNameInput');
+const loginBtn = document.getElementById('loginBtn');
+const expertNameDisplay = document.getElementById('expertNameDisplay');
+const cardList = document.getElementById('cardList');
+const statTotal = document.getElementById('statTotal');
+const statRated = document.getElementById('statRated');
+const statPending = document.getElementById('statPending');
+const statPct = document.getElementById('statPct');
+const exportHint = document.getElementById('exportHint');
+const exportBtn = document.getElementById('exportBtn');
+const exportModal = document.getElementById('exportModal');
+const researcherNameInModal = document.getElementById('researcherNameInModal');
+const researcherEmailInModal = document.getElementById('researcherEmailInModal');
+const copyEmailBtn = document.getElementById('copyEmailBtn');
+const mailtoBtn = document.getElementById('mailtoBtn');
+const closeModalBtn = document.getElementById('closeModalBtn');
+
+researcherNameInModal.textContent = RESEARCHER.name;
+researcherEmailInModal.textContent = RESEARCHER.email;
+
+/* =========================================================
+   登入
+   ========================================================= */
+function tryLogin(){
+  const val = expertNameInput.value.trim();
+  if(!val){ expertNameInput.focus(); return; }
+  expertName = val;
+  expertNameDisplay.textContent = expertName;
+  loginScreen.style.display = 'none';
+  appScreen.style.display = 'block';
+  renderCards();
+  updateStats();
+}
+loginBtn.addEventListener('click', tryLogin);
+expertNameInput.addEventListener('keydown', e => { if(e.key === 'Enter') tryLogin(); });
+
+/* =========================================================
+   卡片渲染
+   ========================================================= */
+const NECESSITY_TAGS = {1:"非常不必要",2:"不必要",3:"普通",4:"必要",5:"非常必要"};
+const NATURE_LABELS = { positive:"正向", negative:"負向", neutral:"中性" };
+
+function renderCards(){
+  cardList.innerHTML = STATEMENTS.map(s => cardTemplate(s)).join('');
+  STATEMENTS.forEach(s => bindCardEvents(s.id));
+}
+
+function cardTemplate(s){
+  return `
+  <article class="card" id="card-${s.id}" data-id="${s.id}">
+    <div class="card-head">
+      <div class="card-index mono">${String(s.id).padStart(2,'0')}</div>
+      <div class="card-text">${escapeHtml(s.text)}</div>
+    </div>
+
+    <div class="field-block">
+      <span class="row-label">① 性質確認</span>
+      <div class="pill-group" data-role="nature-group">
+        <button type="button" class="pill" data-val="positive">正向</button>
+        <button type="button" class="pill" data-val="negative">負向</button>
+        <button type="button" class="pill" data-val="neutral">中性</button>
+      </div>
+    </div>
+
+    <div class="field-block">
+      <span class="row-label">② 必要性評分（1 = 非常不必要，5 = 非常必要）</span>
+      <div class="necessity-scale" data-role="necessity-group">
+        <div class="track"></div>
+        ${[1,2,3,4,5].map(n => `
+          <div class="necessity-dot-wrap" data-val="${n}">
+            <div class="necessity-dot mono">${n}</div>
+            <div class="necessity-tag">${NECESSITY_TAGS[n]}</div>
+          </div>`).join('')}
+      </div>
+    </div>
+
+    <div class="field-block">
+      <label class="noedit-row" data-role="noedit-row">
+        <input type="checkbox" data-role="noedit-checkbox">
+        <span>③ 此陳述句無需修改</span>
+      </label>
+    </div>
+
+    <div class="field-block">
+      <span class="row-label">④ 備註（需修改者請輸入建議，無修改則不必填寫）</span>
+      <textarea class="remark" data-role="remark" placeholder="請輸入修改建議……"></textarea>
+    </div>
+  </article>`;
+}
+
+function escapeHtml(str){
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+/* =========================================================
+   卡片事件綁定
+   ========================================================= */
+function bindCardEvents(id){
+  const card = document.getElementById(`card-${id}`);
+  const r = responses[id];
+
+  // 性質 pills
+  const natureBtns = card.querySelectorAll('[data-role="nature-group"] .pill');
+  natureBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      r.nature = btn.dataset.val;
+      natureBtns.forEach(b => b.classList.toggle('active', b === btn));
+      onCardChange(id);
+    });
+  });
+
+  // 必要性 dots
+  const dots = card.querySelectorAll('[data-role="necessity-group"] .necessity-dot-wrap');
+  dots.forEach(dot => {
+    dot.addEventListener('click', () => {
+      r.necessity = parseInt(dot.dataset.val, 10);
+      dots.forEach(d => d.classList.toggle('active', d === dot));
+      onCardChange(id);
+    });
+  });
+
+  // 無需修改 checkbox
+  const noEditRow = card.querySelector('[data-role="noedit-row"]');
+  const noEditCheckbox = card.querySelector('[data-role="noedit-checkbox"]');
+  const remarkBox = card.querySelector('[data-role="remark"]');
+  noEditCheckbox.addEventListener('change', () => {
+    r.noEdit = noEditCheckbox.checked;
+    noEditRow.classList.toggle('checked', r.noEdit);
+    remarkBox.disabled = r.noEdit;
+    if(r.noEdit){ remarkBox.value = ''; r.remark = ''; }
+    onCardChange(id);
+  });
+
+  // 備註
+  remarkBox.addEventListener('input', () => {
+    r.remark = remarkBox.value;
+  });
+}
+
+function onCardChange(id){
+  const card = document.getElementById(`card-${id}`);
+  const r = responses[id];
+  const complete = !!(r.nature && r.necessity);
+  card.classList.toggle('is-complete', complete);
+  card.classList.toggle('is-pending', !complete);
+  updateStats();
+}
+
+/* =========================================================
+   進度統計
+   ========================================================= */
+function updateStats(){
+  const total = STATEMENTS.length;
+  const rated = STATEMENTS.filter(s => responses[s.id].nature && responses[s.id].necessity).length;
+  const pending = total - rated;
+  const pct = total === 0 ? 0 : Math.round((rated/total)*100);
+
+  statTotal.textContent = total;
+  statRated.textContent = rated;
+  statPending.textContent = pending;
+  statPct.textContent = pct + '%';
+
+  exportHint.textContent = pending === 0
+    ? '所有陳述句皆已完成評分，可以匯出囉！'
+    : `尚有 ${pending} 條陳述句未完成評分`;
+}
+
+/* =========================================================
+   CSV 匯出
+   ========================================================= */
+function buildCsv(){
+  const headers = ['專家姓名','編號','陳述句內容','性質','必要性評分','無需修改','備註'];
+  const rows = STATEMENTS.map(s => {
+    const r = responses[s.id];
+    return [
+      expertName,
+      s.id,
+      s.text,
+      r.nature ? NATURE_LABELS[r.nature] : '',
+      r.necessity ?? '',
+      r.noEdit ? '是' : '否',
+      r.remark || ''
+    ];
+  });
+  const csvLines = [headers, ...rows].map(row =>
+    row.map(csvEscape).join(',')
+  );
+  return '\uFEFF' + csvLines.join('\r\n'); // BOM for Excel 中文相容
+}
+
+function csvEscape(val){
+  const s = String(val ?? '');
+  if(/[",\n]/.test(s)){
+    return '"' + s.replace(/"/g,'""') + '"';
+  }
+  return s;
+}
+
+function downloadCsv(){
+  const csv = buildCsv();
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const safeExpert = expertName.replace(/[^\w\u4e00-\u9fa5]+/g,'_');
+  const dateStr = new Date().toISOString().slice(0,10);
+  a.href = url;
+  a.download = `Q方法陳述句審查_${safeExpert}_${dateStr}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+exportBtn.addEventListener('click', () => {
+  downloadCsv();
+  openExportModal();
+});
+
+/* =========================================================
+   Modal
+   ========================================================= */
+function openExportModal(){
+  exportModal.classList.add('show');
+  const subject = encodeURIComponent(`Q方法陳述句審查回覆 - ${expertName}`);
+  const body = encodeURIComponent(`${RESEARCHER.name} 您好，\n\n附上我的 Q 方法陳述句審查結果 CSV 檔案，請查收。\n\n${expertName} 敬上`);
+  mailtoBtn.href = `mailto:${RESEARCHER.email}?subject=${subject}&body=${body}`;
+}
+closeModalBtn.addEventListener('click', () => exportModal.classList.remove('show'));
+exportModal.addEventListener('click', e => { if(e.target === exportModal) exportModal.classList.remove('show'); });
+
+copyEmailBtn.addEventListener('click', () => {
+  navigator.clipboard.writeText(RESEARCHER.email).then(() => {
+    const original = copyEmailBtn.textContent;
+    copyEmailBtn.textContent = '已複製';
+    setTimeout(() => copyEmailBtn.textContent = original, 1500);
+  });
+});
+</script>
+</body>
+</html>
