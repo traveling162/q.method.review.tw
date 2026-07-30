@@ -31,6 +31,7 @@
     background:var(--paper);
     color:var(--ink);
     font-family:'Inter',sans-serif;
+    font-size:17px;
     -webkit-font-smoothing:antialiased;
     min-height:100vh;
   }
@@ -67,7 +68,7 @@
     border:1px solid var(--line-strong);
     border-radius:var(--radius);
     padding:48px 44px 40px;
-    max-width:440px;
+    max-width:460px;
     width:100%;
     box-shadow:var(--shadow);
   }
@@ -80,7 +81,7 @@
   }
   .eyebrow{
     font-family:'JetBrains Mono',monospace;
-    font-size:11px;
+    font-size:12.5px;
     letter-spacing:0.12em;
     text-transform:uppercase;
     color:var(--red);
@@ -97,19 +98,19 @@
   }
   .login-card h1{
     font-family:'Source Serif 4',serif;
-    font-size:26px;
+    font-size:29px;
     font-weight:600;
     line-height:1.3;
     margin:0 0 10px;
   }
   .login-card p{
     color:var(--ink-soft);
-    font-size:14px;
+    font-size:16px;
     line-height:1.7;
     margin:0 0 28px;
   }
   .field-label{
-    font-size:12px;
+    font-size:14px;
     color:var(--ink-soft);
     margin-bottom:8px;
     display:block;
@@ -121,7 +122,7 @@
     border:1px solid var(--line-strong);
     border-radius:var(--radius);
     background:#fff;
-    font-size:15px;
+    font-size:17px;
     font-family:'Source Serif 4',serif;
     color:var(--ink);
     margin-bottom:22px;
@@ -134,7 +135,7 @@
     color:var(--paper-raised);
     border:none;
     border-radius:var(--radius);
-    font-size:14px;
+    font-size:16px;
     font-weight:600;
     letter-spacing:0.02em;
     display:flex;
@@ -153,7 +154,7 @@
     background:rgba(246,243,236,0.92);
     backdrop-filter:blur(6px);
     border-bottom:1px solid var(--line-strong);
-    padding:14px 28px;
+    padding:14px 28px 0;
   }
   .topbar-inner{
     max-width:1240px;
@@ -163,25 +164,69 @@
     justify-content:space-between;
     gap:16px;
     flex-wrap:wrap;
+    padding-bottom:12px;
   }
   .brand{display:flex; align-items:center; gap:10px;}
   .brand-mark{
-    width:26px;height:26px;
+    width:28px;height:28px;
     border:1.5px solid var(--ink);
     border-radius:50%;
     display:flex;align-items:center;justify-content:center;
     font-family:'Source Serif 4',serif;
-    font-size:13px;font-weight:700;
+    font-size:14px;font-weight:700;
     flex-shrink:0;
   }
-  .brand-text{font-size:13px; color:var(--ink-soft);}
+  .brand-text{font-size:15px; color:var(--ink-soft);}
   .brand-text strong{color:var(--ink); font-weight:600;}
   .expert-badge{
-    font-size:12px;
+    font-size:14px;
     color:var(--ink-soft);
     display:flex;align-items:center;gap:6px;
   }
   .expert-badge strong{color:var(--ink); font-weight:600;}
+
+  /* ---------- Sticky Progress Bar ---------- */
+  .progress-wrap{
+    max-width:1240px;
+    margin:0 auto;
+    padding-bottom:12px;
+  }
+  .progress-meta{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    margin-bottom:6px;
+  }
+  .progress-meta .progress-label{
+    font-size:12.5px;
+    color:var(--ink-soft);
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+  }
+  .progress-meta .progress-count{
+    font-family:'JetBrains Mono',monospace;
+    font-size:13px;
+    color:var(--ink);
+    font-weight:600;
+  }
+  .progress-track{
+    width:100%;
+    height:10px;
+    background:var(--line);
+    border:1px solid var(--line-strong);
+    border-radius:999px;
+    overflow:hidden;
+  }
+  .progress-fill{
+    height:100%;
+    width:0%;
+    background:linear-gradient(90deg, var(--teal) 0%, #3E8072 100%);
+    border-radius:999px;
+    transition:width .3s ease;
+  }
+  .progress-fill.is-full{
+    background:linear-gradient(90deg, var(--teal) 0%, #2E6459 100%);
+  }
 
   .stats-bar{
     max-width:1240px;
@@ -202,12 +247,12 @@
   }
   .stat .num{
     font-family:'Source Serif 4',serif;
-    font-size:24px;
+    font-size:27px;
     font-weight:600;
     line-height:1;
   }
   .stat .lbl{
-    font-size:10.5px;
+    font-size:12px;
     color:var(--ink-soft);
     text-transform:uppercase;
     letter-spacing:0.08em;
@@ -230,18 +275,18 @@
   }
   .intro-panel h2{
     font-family:'Source Serif 4',serif;
-    font-size:19px;
+    font-size:21px;
     margin:0 0 10px;
   }
   .intro-panel p{
-    font-size:13.5px;
+    font-size:15.5px;
     line-height:1.85;
     color:var(--ink-soft);
     margin:0 0 20px;
   }
   .greeting-text{
     font-family:'Source Serif 4',serif;
-    font-size:14.5px;
+    font-size:16.5px;
     line-height:2;
     color:var(--ink);
     padding-bottom:20px;
@@ -249,7 +294,7 @@
     border-bottom:1px solid var(--line);
   }
   .steps-heading{
-    font-size:16px !important;
+    font-size:18px !important;
     margin-bottom:10px !important;
     color:var(--ink-soft);
   }
@@ -258,10 +303,10 @@
     grid-template-columns:repeat(5,1fr);
     gap:14px;
   }
-  .step{font-size:12px; color:var(--ink-soft); line-height:1.6;}
+  .step{font-size:14px; color:var(--ink-soft); line-height:1.6;}
   .step .step-num{
     font-family:'Source Serif 4',serif;
-    font-size:17px;
+    font-size:19px;
     color:var(--red);
     font-weight:600;
     display:block;
@@ -272,7 +317,7 @@
   /* ---------- Statement Card ---------- */
   #cardList{
     display:grid;
-    grid-template-columns:repeat(auto-fill, minmax(270px, 1fr));
+    grid-template-columns:repeat(auto-fill, minmax(290px, 1fr));
     gap:14px;
   }
   .card{
@@ -296,21 +341,21 @@
   }
   .card-index{
     font-family:'JetBrains Mono',monospace;
-    font-size:11px;
+    font-size:12.5px;
     color:var(--ink-faint);
     padding-top:3px;
     flex-shrink:0;
-    min-width:20px;
+    min-width:22px;
   }
   .card-text{
     font-family:'Source Serif 4',serif;
-    font-size:14.5px;
+    font-size:16.5px;
     line-height:1.55;
     color:var(--ink);
   }
 
   .row-label{
-    font-size:10px;
+    font-size:11.5px;
     text-transform:uppercase;
     letter-spacing:0.06em;
     color:var(--ink-faint);
@@ -324,12 +369,12 @@
   .pill-group{display:flex; gap:6px;}
   .pill{
     flex:1;
-    padding:7px 3px;
+    padding:8px 3px;
     text-align:center;
     border:1px solid var(--line-strong);
     border-radius:var(--radius);
     background:transparent;
-    font-size:12px;
+    font-size:14px;
     color:var(--ink-soft);
     transition:all .12s ease;
   }
@@ -347,7 +392,7 @@
   }
   .necessity-scale .track{
     position:absolute;
-    top:8px; left:8px; right:8px;
+    top:9px; left:9px; right:9px;
     height:1px;
     background:var(--line-strong);
     z-index:0;
@@ -362,13 +407,13 @@
     z-index:1;
   }
   .necessity-dot{
-    width:16px; height:16px;
+    width:19px; height:19px;
     border-radius:50%;
     border:1.5px solid var(--line-strong);
     background:var(--paper-raised);
     display:flex;align-items:center;justify-content:center;
     font-family:'JetBrains Mono',monospace;
-    font-size:9px;
+    font-size:10.5px;
     color:var(--ink-faint);
     transition:all .12s ease;
   }
@@ -390,19 +435,19 @@
     border-radius:var(--radius);
     cursor:pointer;
   }
-  .noedit-row input{width:15px;height:15px; accent-color:var(--teal); flex-shrink:0;}
-  .noedit-row span{font-size:12px; color:var(--ink-soft);}
+  .noedit-row input{width:17px;height:17px; accent-color:var(--teal); flex-shrink:0;}
+  .noedit-row span{font-size:14px; color:var(--ink-soft);}
   .noedit-row.checked{background:var(--teal-soft); border-color:var(--teal);}
   .noedit-row.checked span{color:var(--teal); font-weight:600;}
 
   textarea.remark{
     width:100%;
-    min-height:56px;
+    min-height:60px;
     padding:9px 11px;
     border:1px solid var(--line-strong);
     border-radius:var(--radius);
     font-family:'Inter',sans-serif;
-    font-size:12.5px;
+    font-size:14.5px;
     color:var(--ink);
     resize:vertical;
     background:#fff;
@@ -431,14 +476,14 @@
     align-items:center;
     gap:16px;
   }
-  .export-hint{font-size:12px; color:var(--ink-soft);}
+  .export-hint{font-size:14px; color:var(--ink-soft);}
   .btn-export{
     padding:12px 26px;
     background:var(--ink);
     color:var(--paper-raised);
     border:none;
     border-radius:var(--radius);
-    font-size:13.5px;
+    font-size:15px;
     font-weight:600;
     display:flex; align-items:center; gap:8px;
   }
@@ -457,7 +502,7 @@
   .modal-box{
     background:var(--paper-raised);
     border-radius:var(--radius);
-    max-width:440px; width:100%;
+    max-width:460px; width:100%;
     padding:34px 30px 28px;
     box-shadow:0 20px 60px rgba(0,0,0,0.25);
   }
@@ -472,10 +517,10 @@
   }
   .modal-box h3{
     font-family:'Source Serif 4',serif;
-    font-size:19px;
+    font-size:21px;
     margin:0 0 10px;
   }
-  .modal-box p{font-size:13.5px; color:var(--ink-soft); line-height:1.75; margin:0 0 18px;}
+  .modal-box p{font-size:15px; color:var(--ink-soft); line-height:1.75; margin:0 0 18px;}
   .email-row{
     display:flex; align-items:center; justify-content:space-between;
     background:var(--paper);
@@ -484,17 +529,17 @@
     padding:10px 14px;
     margin-bottom:18px;
   }
-  .email-row span{font-family:'JetBrains Mono',monospace; font-size:12.5px;}
+  .email-row span{font-family:'JetBrains Mono',monospace; font-size:14px;}
   .email-row button{
     background:none; border:1px solid var(--line-strong);
     border-radius:var(--radius);
-    font-size:11px; padding:5px 10px;
+    font-size:12.5px; padding:5px 10px;
     color:var(--ink-soft);
   }
   .email-row button:hover{border-color:var(--ink);}
   .modal-steps{margin:0 0 22px; padding-left:0; list-style:none;}
   .modal-steps li{
-    font-size:12.5px; color:var(--ink-soft);
+    font-size:14px; color:var(--ink-soft);
     display:flex; gap:10px; margin-bottom:8px;
     align-items:flex-start;
   }
@@ -509,7 +554,7 @@
     background:var(--ink);
     color:var(--paper-raised);
     border-radius:var(--radius);
-    font-size:13px; font-weight:600;
+    font-size:14.5px; font-weight:600;
     text-decoration:none;
   }
   .btn-mailto:hover{background:var(--red);}
@@ -519,7 +564,7 @@
     background:none;
     border:1px solid var(--line-strong);
     border-radius:var(--radius);
-    font-size:13px;
+    font-size:14.5px;
     color:var(--ink-soft);
   }
   .btn-close-modal:hover{border-color:var(--ink);}
@@ -529,7 +574,7 @@
     .stats-bar{grid-template-columns:repeat(2,1fr);}
     .necessity-tag{display:none;}
     main{padding:22px 16px 110px;}
-    .topbar{padding:14px 16px;}
+    .topbar{padding:14px 16px 0;}
     .stats-bar{padding:16px 16px 0;}
   }
 
@@ -563,6 +608,15 @@
         <div class="brand-text"><strong>陳述句．專家審查系統</strong></div>
       </div>
       <div class="expert-badge">審查專家：<strong id="expertNameDisplay"></strong></div>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-meta">
+        <span class="progress-label">審查進度</span>
+        <span class="progress-count mono" id="progressCount">0 / 0</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
     </div>
   </header>
 
@@ -804,6 +858,8 @@ const researcherEmailInModal = document.getElementById('researcherEmailInModal')
 const copyEmailBtn = document.getElementById('copyEmailBtn');
 const mailtoBtn = document.getElementById('mailtoBtn');
 const closeModalBtn = document.getElementById('closeModalBtn');
+const progressFill = document.getElementById('progressFill');
+const progressCount = document.getElementById('progressCount');
 
 researcherNameInModal.textContent = RESEARCHER.name;
 researcherEmailInModal.textContent = RESEARCHER.email;
@@ -951,6 +1007,10 @@ function updateStats(){
   statRated.textContent = rated;
   statPending.textContent = pending;
   statPct.textContent = pct + '%';
+
+  progressFill.style.width = pct + '%';
+  progressFill.classList.toggle('is-full', pct === 100);
+  progressCount.textContent = `${rated} / ${total}`;
 
   exportHint.textContent = pending === 0
     ? '所有陳述句皆已完成評分，可以匯出囉！'
