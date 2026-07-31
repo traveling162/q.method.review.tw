@@ -320,6 +320,26 @@
     grid-template-columns:repeat(auto-fill, minmax(290px, 1fr));
     gap:14px;
   }
+  .group-divider{
+  grid-column:1 / -1;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin:22px 0 2px;
+}
+.group-divider:first-child{margin-top:0;}
+.group-divider .line{
+  flex:1;
+  height:1px;
+  background:var(--line-strong);
+}
+.group-divider .label{
+  font-family:'JetBrains Mono',monospace;
+  font-size:12px;
+  letter-spacing:0.08em;
+  color:var(--ink-faint);
+  white-space:nowrap;
+}
   .card{
     background:var(--paper-raised);
     border:1px solid var(--line-strong);
@@ -893,7 +913,21 @@ const NECESSITY_TAGS = {1:"非常不必要",2:"不必要",3:"普通",4:"必要",
 const NATURE_LABELS = { positive:"正向", negative:"負向", neutral:"中性" };
 
 function renderCards(){
-  cardList.innerHTML = STATEMENTS.map(s => cardTemplate(s)).join('');
+  const GROUP_SIZE = 5;
+  let html = '';
+  STATEMENTS.forEach((s, i) => {
+    if(i % GROUP_SIZE === 0){
+      const start = i + 1;
+      const end = Math.min(i + GROUP_SIZE, STATEMENTS.length);
+      html += `
+      <div class="group-divider">
+        <span class="label">第 ${start}–${end} 句</span>
+        <span class="line"></span>
+      </div>`;
+    }
+    html += cardTemplate(s);
+  });
+  cardList.innerHTML = html;
   STATEMENTS.forEach(s => bindCardEvents(s.id));
 }
 
