@@ -496,7 +496,16 @@
     align-items:center;
     gap:16px;
   }
-  .export-hint{font-size:14px; color:var(--ink-soft);}
+  .export-hint{font-size:14px; color:var(--ink-soft); transition:color .15s ease;}
+  .export-hint.is-error{color:var(--red); font-weight:600;}
+  @keyframes flashIncomplete{
+    0%,100%{box-shadow:none;}
+    50%{box-shadow:0 0 0 3px var(--red-soft);}
+  }
+  .card.flash-incomplete{
+    animation:flashIncomplete 0.7s ease-in-out 2;
+    border-left-color:var(--red) !important;
+  }
   .btn-export{
     padding:12px 26px;
     background:var(--ink);
@@ -1072,9 +1081,42 @@ async function submitToSheet(){
 }
 
 /* =========================================================
+   送出前檢查：擋下未完成評分就送出
+   ========================================================= */
+function getFirstIncompleteId(){
+  for(const s of STATEMENTS){
+    const r = responses[s.id];
+    if(!(r.nature && r.necessity)) return s.id;
+  }
+  return null;
+}
+
+function blockIncompleteSubmit(id){
+  exportHint.textContent = '尚有陳述句未完成評分，請完成後再送出';
+  exportHint.classList.add('is-error');
+  setTimeout(() => {
+    exportHint.classList.remove('is-error');
+    updateStats();
+  }, 2500);
+
+  const card = document.getElementById(`card-${id}`);
+  if(card){
+    card.scrollIntoView({ behavior:'smooth', block:'center' });
+    card.classList.add('flash-incomplete');
+    setTimeout(() => card.classList.remove('flash-incomplete'), 1400);
+  }
+}
+
+/* =========================================================
    送出流程
    ========================================================= */
 exportBtn.addEventListener('click', async () => {
+  const firstIncomplete = getFirstIncompleteId();
+  if(firstIncomplete !== null){
+    blockIncompleteSubmit(firstIncomplete);
+    return;
+  }
+
   const originalLabel = exportBtn.textContent;
   exportBtn.disabled = true;
   exportBtn.textContent = '送出中...';
